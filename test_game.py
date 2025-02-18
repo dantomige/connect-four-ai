@@ -28,7 +28,6 @@ class TestBoard(unittest.TestCase):
     def test_drop_piece_invalid_column(self):
         with self.assertRaises(AssertionError):
             self.board.drop_piece(0, BoardPlayers.RED)
-
         with self.assertRaises(AssertionError):
             self.board.drop_piece(8, BoardPlayers.YELLOW)
 
@@ -40,7 +39,6 @@ class TestBoard(unittest.TestCase):
         self.assertFalse(self.board.is_drawn())
 
     def test_is_drawn_true(self):
-        # Fill the board completely
         for col in range(1, self.board.NUM_COLS + 1):
             for row in range(self.board.NUM_ROWS):
                 self.board.drop_piece(col, BoardPlayers.RED if row % 2 == 0 else BoardPlayers.YELLOW)
@@ -54,73 +52,36 @@ class TestBoard(unittest.TestCase):
                 self.assertIsNone(cell)
 
     def test_board_str(self):
-        # Drop a few pieces
         self.board.drop_piece(1, BoardPlayers.RED)
         self.board.drop_piece(2, BoardPlayers.YELLOW)
-        expected_output = (
-            "|   |   |   |   |   |   |   |\n"
-            "|   |   |   |   |   |   |   |\n"
-            "|   |   |   |   |   |   |   |\n"
-            "|   |   |   |   |   |   |   |\n"
-            "|   |   |   |   |   |   |   |\n"
-            "| X | O |   |   |   |   |   |\n"
-            + "_" * 29
-        )
+        expected_output = ("|   |   |   |   |   |   |   |\n" * 5 + "| X | O |   |   |   |   |   |\n" + "_" * 29)
         self.assertEqual(str(self.board), expected_output)
 
     def test_horizontal_win(self):
         for col in range(1, 5):
             self.board.drop_piece(col, BoardPlayers.RED)
-        self.assertTrue(self.board.has_won(BoardPlayers.RED))
+        self.assertTrue(self.board.has_won_player(BoardPlayers.RED, 4, 5))
 
     def test_vertical_win(self):
         for row in range(4):
             self.board.drop_piece(1, BoardPlayers.YELLOW)
-        self.assertTrue(self.board.has_won(BoardPlayers.YELLOW))
+        self.assertTrue(self.board.has_won_player(BoardPlayers.YELLOW, 1, 2))
 
     def test_diagonal_win_positive_slope(self):
-        self.board.drop_piece(1, BoardPlayers.RED)
-        self.board.drop_piece(2, BoardPlayers.YELLOW)
-        self.board.drop_piece(2, BoardPlayers.RED)
-        self.board.drop_piece(3, BoardPlayers.YELLOW)
-        self.board.drop_piece(3, BoardPlayers.YELLOW)
-        self.board.drop_piece(3, BoardPlayers.RED)
-        self.board.drop_piece(4, BoardPlayers.YELLOW)
-        self.board.drop_piece(4, BoardPlayers.YELLOW)
-        self.board.drop_piece(4, BoardPlayers.YELLOW)
-        self.board.drop_piece(4, BoardPlayers.RED)
-
-        # Board layout:
-        # |   |   |   |   |   |   |   |
-        # |   |   |   |   |   |   |   |
-        # |   |   |   |   |   |   |   |
-        # |   |   |   |   |   |   |   |
-        # |   |   | O |   |   |   |   |
-        # | X | X | X | X |   |   |   |
-
-        self.assertTrue(self.board.has_won(BoardPlayers.RED))
+        moves = [(1, BoardPlayers.RED), (2, BoardPlayers.YELLOW), (2, BoardPlayers.RED),
+                 (3, BoardPlayers.YELLOW), (3, BoardPlayers.YELLOW), (3, BoardPlayers.RED),
+                 (4, BoardPlayers.YELLOW), (4, BoardPlayers.YELLOW), (4, BoardPlayers.YELLOW), (4, BoardPlayers.RED)]
+        for col, player in moves:
+            self.board.drop_piece(col, player)
+        self.assertTrue(self.board.has_won_player(BoardPlayers.RED, 4, 2))
 
     def test_diagonal_win_negative_slope(self):
-        self.board.drop_piece(4, BoardPlayers.RED)
-        self.board.drop_piece(3, BoardPlayers.YELLOW)
-        self.board.drop_piece(3, BoardPlayers.RED)
-        self.board.drop_piece(2, BoardPlayers.YELLOW)
-        self.board.drop_piece(2, BoardPlayers.YELLOW)
-        self.board.drop_piece(2, BoardPlayers.RED)
-        self.board.drop_piece(1, BoardPlayers.YELLOW)
-        self.board.drop_piece(1, BoardPlayers.YELLOW)
-        self.board.drop_piece(1, BoardPlayers.YELLOW)
-        self.board.drop_piece(1, BoardPlayers.RED)
-
-        # Board layout:
-        # |   |   |   |   |   |   |   |
-        # |   |   |   |   |   |   |   |
-        # |   |   |   |   |   |   |   |
-        # |   |   |   |   |   |   |   |
-        # |   | O | O | O |   |   |   |
-        # | X | X | X | X |   |   |   |
-
-        self.assertTrue(self.board.has_won(BoardPlayers.RED))
+        moves = [(4, BoardPlayers.RED), (3, BoardPlayers.YELLOW), (3, BoardPlayers.RED),
+                 (2, BoardPlayers.YELLOW), (2, BoardPlayers.YELLOW), (2, BoardPlayers.RED),
+                 (1, BoardPlayers.YELLOW), (1, BoardPlayers.YELLOW), (1, BoardPlayers.YELLOW), (1, BoardPlayers.RED)]
+        for col, player in moves:
+            self.board.drop_piece(col, player)
+        self.assertTrue(self.board.has_won_player(BoardPlayers.RED, 1, 2))
 
 if __name__ == "__main__":
     unittest.main()

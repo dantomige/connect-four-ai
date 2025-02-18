@@ -27,41 +27,42 @@ class Board:
         self.board = [[None for _ in range(7)] for _ in range(6)]
         self.NUM_ROWS = 6
         self.NUM_COLS = 7
+        self.NUM_TO_WIN = 4
         
-    def has_won(self, player: BoardPlayers):
-        """Determines if 'player' has won the game
+    # def has_won(self, player: BoardPlayers):
+    #     """Determines if 'player' has won the game
 
-        Args:
-            player (BoardPlayers): a player of color RED or YELLOW
+    #     Args:
+    #         player (BoardPlayers): a player of color RED or YELLOW
        
-        Returns:
-            bool: true if there player has won
-        """
+    #     Returns:
+    #         bool: true if there player has won
+    #     """
 
-        def get_at_location(row, col):
-            if not 0 <= row < self.NUM_ROWS or not 0 <= col < self.NUM_COLS:
-                return None
-            return self.board[row][col]
+    #     def get_at_location(row, col):
+    #         if not 0 <= row < self.NUM_ROWS or not 0 <= col < self.NUM_COLS:
+    #             return None
+    #         return self.board[row][col]
 
-        def check_four_directions(row, col):
-            h_count, v_count, dr_count, dl_count = 0, 0, 0, 0
-            for i in range(4):
-                # check horizontal
-                h_count += (get_at_location(row, col + i) == player)
-                # check vertical
-                v_count += (get_at_location(row + i, col) == player)
-                # check diagonal down right
-                dr_count += (get_at_location(row + i, col + i) == player)
-                # check diagonal down left
-                dl_count += (get_at_location(row - i, col + i) == player)
-            return max(h_count, v_count, dr_count, dl_count) == 4 # if any wins
+    #     def check_four_directions(row, col):
+    #         h_count, v_count, dr_count, dl_count = 0, 0, 0, 0
+    #         for i in range(4):
+    #             # check horizontal
+    #             h_count += (get_at_location(row, col + i) == player)
+    #             # check vertical
+    #             v_count += (get_at_location(row + i, col) == player)
+    #             # check diagonal down right
+    #             dr_count += (get_at_location(row + i, col + i) == player)
+    #             # check diagonal down left
+    #             dl_count += (get_at_location(row - i, col + i) == player)
+    #         return max(h_count, v_count, dr_count, dl_count) == 4 # if any wins
         
-        for row in range(self.NUM_ROWS):
-            for col in range(self.NUM_COLS):
-                if self.board[row][col] == player:
-                    if check_four_directions(row, col):
-                        return True      
-        return False
+    #     for row in range(self.NUM_ROWS):
+    #         for col in range(self.NUM_COLS):
+    #             if self.board[row][col] == player:
+    #                 if check_four_directions(row, col):
+    #                     return True      
+    #     return False
 
     def is_drawn(self):
         """Determines if the game is drawn i.e. no other moves can be made.
@@ -92,6 +93,130 @@ class Board:
             curr_row += 1
 
         self.board[curr_row][column - 1] = player
+
+
+    def check_direction(self, player: BoardPlayers, column: int, row: int, column_dir: int, row_dir: int):
+        
+        count = 0
+        row_indices = [row + delta * row_dir for delta in range(self.NUM_TO_WIN)]
+        col_indices = [column + delta * column_dir for delta in range(self.NUM_TO_WIN)]
+
+        for r, c in zip(row_indices, col_indices):
+            if r is None or c is None:
+                break
+            if (r >= self.NUM_ROWS or r < 0) or (c >= self.NUM_COLS or c < 0):
+                break
+            if self.board[r][c] != player:
+                break
+            count += 1
+
+        return count
+
+    def check_diagonal(self, player: BoardPlayers, column: int, row: int):
+        # print("location", column, row)
+        negative_diag_count = 1
+        row_indices = range(row + 1,  min(row + 4, self.NUM_ROWS))
+        col_indices = range(column,  min(column + 3, self.NUM_COLS))
+        # print(row_indices, col_indices)
+
+        for r, c in zip(row_indices, col_indices):
+            # print("first", r, c)
+            if r is None or c is None:
+                break
+            if self.board[r][c] != player:
+                break
+            negative_diag_count += 1
+
+        row_indices = range(max(row - 3, 0), row)
+        col_indices = range(max(column - 4, 0), column - 1)
+        # print(row_indices, col_indices)
+
+        for r, c in zip(reversed(row_indices), reversed(col_indices)):
+            # print("second", r, c)
+            if r is None or c is None:
+                break
+            if self.board[r][c] != player:
+                break
+            negative_diag_count += 1
+
+        positive_diag_count = 1
+        row_indices = range(max(row - 3, 0), row)
+        col_indices = range(column,  min(column + 3, self.NUM_COLS))
+        # print(row_indices, col_indices)
+
+        for r, c in zip(reversed(row_indices), col_indices):
+            # print("third", r, c)
+            if r is None or c is None:
+                break
+            if self.board[r][c] != player:
+                break
+            positive_diag_count += 1
+
+        row_indices = range(row + 1,  min(row + 4, self.NUM_ROWS))
+        col_indices = range(max(column - 4, 0), column - 1)
+        # print(row_indices, col_indices)
+
+        for r, c in zip(row_indices, reversed(col_indices)):
+            # print("fourth", r, c)
+            if r is None or c is None:
+                break
+            if self.board[r][c] != player:
+                break
+            positive_diag_count += 1
+        # print(positive_diag_count, negative_diag_count)
+        return positive_diag_count >= 4 or negative_diag_count >= 4
+
+    def check_horizontal(self, player: BoardPlayers, column: int, row: int):
+        count = 1
+        col_indices = range(column,  min(column + 3, self.NUM_COLS))
+        row_indices = [row for _ in range(len(col_indices))]
+
+        for r, c in zip(row_indices, col_indices):
+            if self.board[r][c] != player:
+                break
+            count += 1
+
+        col_indices = range(max(column - 4, 0), column - 1)
+        row_indices = [row for _ in range(len(col_indices))]
+        
+        for r, c in zip(row_indices, reversed(col_indices)):
+            if self.board[r][c] != player:
+                break
+            count += 1
+        return count >= 4
+
+    # def check_vertical(self, player: BoardPlayers, column: int, row: int):
+    #     count = 0
+    #     row_indices = range(row, min(row + 4, self.NUM_ROWS))
+    #     col_indices = [column - 1 for _ in range(len(row_indices))]
+
+    #     for r, c in zip(row_indices, col_indices):
+    #         if self.board[r][c] == player:
+    #             count += 1
+    #     return count == 4
+    def check_vertical(self, player: BoardPlayers, column: int, row: int):
+        count = 0
+        row_indices = range(row, min(row + 4, self.NUM_ROWS))
+        col_indices = [column - 1 for _ in range(len(row_indices))]
+
+        for r, c in zip(row_indices, col_indices):
+            if self.board[r][c] == player:
+                count += 1
+        return count == 4
+
+    def has_won_player(self, player: BoardPlayers, column: int, row: int):
+        """Checks if player has won given that the last move was at column (indexed 1 to 7) and row (indexed 0 to 5)
+
+        Args:
+            player (BoardPlayers): a player of RED or YELLOW
+            column (_type_): column where the last player piece was dropped
+            row (_type_): row where the last player piece was dropped
+        """
+        checks = [self.check_vertical, self.check_horizontal, self.check_diagonal]
+        return any(check(player, column, row,) for check in checks)
+
+        
+
 
     def copy_board(self):
         """Creates a brand new copy of the board
