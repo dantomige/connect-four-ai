@@ -53,12 +53,12 @@ class Connect4AI:
     
     def employ_easy_strategy(self) -> int:
         best_move, score = self.minimax(self.player, depth = 3)
-        print(best_move, score)
+        # print(best_move, score)
         return best_move
     
     def employ_medium_strategy(self) -> int:
         best_move, score = self.minimax(self.player, depth = 5)
-        print(best_move, score)
+        # print(best_move, score)
         return best_move
     
     def identify_winning_moves(self, player):
@@ -88,7 +88,7 @@ class Connect4AI:
 
         print("starting depth", depth)
         best_move, score = self.minimax(self.player, depth, move_func=strategy)
-        print(best_move, score)
+        # print(best_move, score)
         return best_move
     
     def employ_master_strategy(self) -> int:
@@ -102,7 +102,7 @@ class Connect4AI:
                 # 3 in a row
             pass
         best_move, score = self.minimax(self.player, depth = 41)
-        print(best_move, score)
+        # print(best_move, score)
         return best_move
     
     def set_strength(self, strength: GameAIStrength):

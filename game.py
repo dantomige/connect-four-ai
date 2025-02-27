@@ -1,4 +1,5 @@
 from enum import Enum
+import time
 
 class BoardPlayers(Enum):
     RED = 1
@@ -187,6 +188,17 @@ class Board:
     
     def get_game_state(self):
         return self.game_state
+    
+    def drop_piece_animation(self, column: int, player: BoardPlayers):
+        row = 0
+        while row < self.NUM_ROWS - 1 and self.board[row + 1][column - 1] == None:
+            self.board[row][column - 1] = player
+            print(self)
+            time.sleep(0.2)
+            self.board[row][column - 1] = None
+            print(self)
+            row += 1
+
 
     def __str__(self):
         """Visual representation of the game board where
