@@ -38,6 +38,7 @@ class Board:
         self.UP = self.LEFT = -1
         self.STAY = 0
         self.game_state = GameState.EMPTY
+        self.last_moves = []
 
     def is_drawn(self) -> bool:
         """Determines if the game is drawn i.e. no other moves can be made.
@@ -46,6 +47,9 @@ class Board:
             if self.board[0][col] is None:
                 return False
         return True
+    
+    def is_column_open(self, column) -> bool:
+        return self.board[0][column - 1] == None
 
     def drop_piece(self, column: int, player: BoardPlayers) -> GameState:
         """Drops a piece of color 'player''s types into the column 'column
@@ -67,6 +71,7 @@ class Board:
             curr_row += 1
 
         self.board[curr_row][column - 1] = player
+        self.last_moves.append(column)
 
         if self.is_drawn():
             self.game_state = GameState.DRAWN
@@ -168,6 +173,20 @@ class Board:
         """Resets the game board
         """
         self.board = [[None for _ in range(7)] for _ in range(6)]
+
+    def undo_last_move(self):
+        if not self.last_moves:
+            return False
+        curr_row = 0
+        last_move_col = self.last_moves.pop()
+        while curr_row < self.NUM_ROWS and self.board[curr_row][last_move_col - 1] == None:
+            curr_row += 1
+        self.board[curr_row][last_move_col - 1] = None
+        self.game_state = GameState.PLAYING if self.last_moves else GameState.EMPTY
+        return True
+    
+    def get_game_state(self):
+        return self.game_state
 
     def __str__(self):
         """Visual representation of the game board where
