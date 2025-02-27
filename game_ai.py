@@ -1,5 +1,6 @@
 from game import Board, BoardPlayers, GameState
 from enum import Enum
+from typing import Callable
 import random
 
 class GameAIStrength(Enum):
@@ -32,11 +33,11 @@ class Connect4AI:
             print("USING EASY STRATEGY")
             return self.employ_easy_strategy()
         elif self.strength == GameAIStrength.MEDIUM:
-            pass
+            return self.employ_medium_strategy()
         elif self.strength == GameAIStrength.HARD:
-            pass
+            return self.employ_hard_strategy()
         elif self.strength == GameAIStrength.MASTER:
-            pass
+            return self.employ_master_strategy()
         else:
             assert False, "game strength not found"
     
@@ -47,14 +48,12 @@ class Connect4AI:
     
     def employ_easy_strategy(self) -> int:
         best_move, score = self.minimax(self.player, depth = 3)
-        # if score == 0: best_move = self.employ_random_strategy()
         print(best_move, score)
         return best_move
     
     def employ_medium_strategy(self) -> int:
         best_move, score = self.minimax(self.player, depth = 5)
-        if score == 0: best_move = self.employ_random_strategy()
-        # print(best_move, score)
+        print(best_move, score)
         return best_move
     
     def employ_hard_strategy(self) -> int:
@@ -63,7 +62,7 @@ class Connect4AI:
         return best_move
     
     def employ_master_strategy(self) -> int:
-        best_move, score = self.minimax(self.player, depth = 25)
+        best_move, score = self.minimax(self.player, depth = 41)
         # print(best_move, score)
         return best_move
     
@@ -80,7 +79,7 @@ class Connect4AI:
                 moves.append(col)
         return moves
 
-    def minimax(self, curr_player: BoardPlayers, depth: int):
+    def minimax(self, curr_player: BoardPlayers, depth: int, move_func: Callable[[list[int]], int] = random.choice):
         
         # terminal states
         if self.board.get_game_state() == GameState.WON:
@@ -119,7 +118,8 @@ class Connect4AI:
                 elif score == best_score:
                     best_moves.append(move)
 
-        best_move = random.choice(best_moves)
+        assert best_moves, "expected to be able to find a move to play"
+        best_move = move_func(best_moves)
         return best_move, best_score
 
 

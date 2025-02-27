@@ -1,6 +1,6 @@
 from enum import Enum
 from game import Board, BoardPlayers, GameState
-from game_ai import Connect4AI, GameAIStrength
+from game_ai import GameAIStrength, Connect4AI
 import random
 
 if __name__ == "__main__":
